@@ -1,4 +1,4 @@
-package com.meetplus.batch.config;
+package com.meetplus.batch;
 
 import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.Payment;
@@ -41,9 +41,8 @@ public class PaymentCancelJob {
         this.entityManagerFactory = entityManagerFactory;
     }
 
-
     @Bean
-    public ItemReader<Payment> reader() {
+    public ItemReader<Payment> paymentCancelReader() {
         return new ItemReader<Payment>() {
             private Iterator<Payment> paymentsIterator;
 
@@ -65,7 +64,7 @@ public class PaymentCancelJob {
     }
 
     @Bean
-    public ItemProcessor<Payment, Payment> processor() {
+    public ItemProcessor<Payment, Payment> paymentCancelProcessor() {
         return payment -> {
             payment.setPaymentStatus(PaymentStatus.CANCEL);
             return payment;
@@ -73,7 +72,7 @@ public class PaymentCancelJob {
     }
 
     @Bean
-    public JpaItemWriter<Payment> writer() {
+    public JpaItemWriter<Payment> paymentCancelWriter() {
         return new JpaItemWriterBuilder<Payment>()
             .entityManagerFactory(entityManagerFactory)
             .build();
@@ -83,16 +82,16 @@ public class PaymentCancelJob {
     public Step updatePaymentStatusStep() {
         return new StepBuilder("updatePaymentStatusStep", jobRepository)
             .<Payment, Payment>chunk(10, transactionManager)
-            .reader(reader())
-            .processor(processor())
-            .writer(writer())
+            .reader(paymentCancelReader())
+            .processor(paymentCancelProcessor())
+            .writer(paymentCancelWriter())
             .build();
     }
 
     @Bean
-    public Job updatePaymentStatusJob(Step updateColumnStep) {
+    public Job updatePaymentStatusJob(Step updatePaymentStatusStep) {
         return new JobBuilder("updatePaymentStatusJob", jobRepository)
-            .start(updateColumnStep)
+            .start(updatePaymentStatusStep)
             .build();
     }
 }
