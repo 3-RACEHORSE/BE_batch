@@ -13,12 +13,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-//@RequiredArgsConstructor
 public class PaymentCancelSchedule {
 
     private final JobLauncher jobLauncher;
-
-    //    @Qualifier("updatePaymentStatusJob")
     private final Job updatePaymentStatusJob;
 
     public PaymentCancelSchedule(JobLauncher jobLauncher,
