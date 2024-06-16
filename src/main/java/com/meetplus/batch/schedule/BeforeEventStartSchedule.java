@@ -35,7 +35,7 @@ public class BeforeEventStartSchedule {
     public void scheduleJob(NewAuctionPostDto newAuctionPostDto) {
         // 실행 시간 설정
         LocalDateTime executionTime = newAuctionPostDto.getEventStartTime()
-                .plusHours(ScheduleTimeEnum.BEFORE_EVENT_START.getTime());
+                .plusHours(ScheduleTimeEnum.BEFORE_EVENT_START_24.getTime());
         log.info("Scheduling job to run at >>> {}", executionTime);
 
         // delay가 0이 되면 Job 실행
