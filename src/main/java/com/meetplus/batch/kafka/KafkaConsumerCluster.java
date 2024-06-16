@@ -2,6 +2,8 @@ package com.meetplus.batch.kafka;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -31,10 +33,15 @@ public class KafkaConsumerCluster {
         log.info("consumer: success >>> message: {}, headers: {}", message.toString(),
             messageHeaders);
 
+        // 시간 형식 지정
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(message.get("eventStartTime").toString(), formatter);
+        LocalDateTime eventStartTime = offsetDateTime.toLocalDateTime();
+
         //message를 NewAuctionPostDto 변환
         NewAuctionPostDto newAuctionPostDto = NewAuctionPostDto.builder()
             .auctionUuid(message.get("auctionUuid").toString())
-            .eventStartTime(LocalDateTime.parse(message.get("eventStartTime").toString()))
+            .eventStartTime(eventStartTime)
             .build();
 
         log.info("consumer: success >>> newAuctionPostDto: {}", newAuctionPostDto.toString());

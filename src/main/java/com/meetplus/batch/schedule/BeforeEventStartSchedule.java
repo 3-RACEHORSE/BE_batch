@@ -39,7 +39,10 @@ public class BeforeEventStartSchedule {
         log.info("Scheduling job to run at >>> {}", executionTime);
 
         // delay가 0이 되면 Job 실행
-        long delay = Duration.between(LocalDateTime.now(), executionTime).toMillis();
+        //todo
+        // 지금은 메시지 받고 5초 뒤 작동하도록 진행했으나 실제로는 밑 주석으로 진행해야 한다.
+//        long delay = Duration.between(LocalDateTime.now(), executionTime).toMillis();
+        long delay = Duration.between(LocalDateTime.now(), LocalDateTime.now().plusSeconds(5)).toMillis();
 
         // delay가 음수인 경우 즉시 실행
         if (delay < 0) {
