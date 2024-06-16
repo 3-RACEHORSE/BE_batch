@@ -7,11 +7,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import static com.meetplus.batch.domain.QPayment.payment;
+import static com.meetplus.batch.domain.payment.QPayment.payment;
 
 @Repository
 @RequiredArgsConstructor
-public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
+public class PaymentRepositoryImpl implements PaymentRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 

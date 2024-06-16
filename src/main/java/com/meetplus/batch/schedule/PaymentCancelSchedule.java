@@ -25,8 +25,9 @@ public class PaymentCancelSchedule {
     }
 
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 52 3 * * ?")
     public void runJob() throws Exception {
+        System.out.println("job start");
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("paymentCancelTime", String.valueOf(System.currentTimeMillis()))  // 고유한 파라미터 추가
                 .toJobParameters();

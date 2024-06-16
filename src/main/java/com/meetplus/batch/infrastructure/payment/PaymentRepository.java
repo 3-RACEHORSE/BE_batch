@@ -1,7 +1,7 @@
-package com.meetplus.batch.infrastructure;
+package com.meetplus.batch.infrastructure.payment;
 
 import com.meetplus.batch.common.PaymentStatus;
-import com.meetplus.batch.domain.Payment;
+import com.meetplus.batch.domain.payment.Payment;
 import com.meetplus.batch.infrastructure.querydsl.PaymentRepositoryCustom;
 import java.time.LocalDateTime;
 import java.util.List;

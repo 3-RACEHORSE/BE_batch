@@ -1,8 +1,8 @@
 package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.common.PaymentStatus;
-import com.meetplus.batch.domain.Payment;
-import com.meetplus.batch.infrastructure.PaymentRepository;
+import com.meetplus.batch.domain.payment.Payment;
+import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Iterator;
 import java.util.List;
