@@ -1,4 +1,4 @@
-package com.meetplus.batch;
+package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.Payment;
@@ -17,6 +17,7 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -79,6 +80,7 @@ public class PaymentCancelJob {
     }
 
     @Bean
+    @Qualifier("updatePaymentStatusStep")
     public Step updatePaymentStatusStep() {
         return new StepBuilder("updatePaymentStatusStep", jobRepository)
             .<Payment, Payment>chunk(10, transactionManager)
@@ -89,7 +91,8 @@ public class PaymentCancelJob {
     }
 
     @Bean
-    public Job updatePaymentStatusJob(Step updatePaymentStatusStep) {
+    @Qualifier("updatePaymentStatusJob")
+    public Job updatePaymentStatusJob(@Qualifier("updatePaymentStatusStep") Step updatePaymentStatusStep) {
         return new JobBuilder("updatePaymentStatusJob", jobRepository)
             .start(updatePaymentStatusStep)
             .build();

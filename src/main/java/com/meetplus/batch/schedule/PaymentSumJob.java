@@ -1,4 +1,4 @@
-package com.meetplus.batch;
+package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.domain.Bank;
 import com.meetplus.batch.infrastructure.BankRepository;
@@ -19,6 +19,7 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -112,6 +113,7 @@ public class PaymentSumJob {
     }
 
     @Bean
+    @Qualifier("sumPaymentAmountPaidStep")
     public Step sumPaymentAmountPaidStep() {
         return new StepBuilder("sumPaymentAmountPaidStep", jobRepository)
             .<String, Bank>chunk(10, transactionManager)
@@ -122,7 +124,8 @@ public class PaymentSumJob {
     }
 
     @Bean
-    public Job sumPaymentAmountPaidJob(Step sumPaymentAmountPaidStep) {
+    @Qualifier("sumPaymentAmountPaidJob")
+    public Job sumPaymentAmountPaidJob(@Qualifier("sumPaymentAmountPaidStep") Step sumPaymentAmountPaidStep) {
         return new JobBuilder("sumPaymentAmountPaidJob", jobRepository)
             .start(sumPaymentAmountPaidStep)
             .build();
