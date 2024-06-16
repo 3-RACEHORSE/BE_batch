@@ -1,0 +1,23 @@
+package com.meetplus.batch.kafka;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum Topics {
+    NOTIFICATION_SERVICE(Constant.NOTIFICATION_SERVICE),
+    CHAT_SERVICE(Constant.CHAT_SERVICE),
+    AUCTION_POST_SERVICE(Constant.AUCTION_POST_SERVICE),
+    PAYMENT_SERVICE(Constant.PAYMENT_SERVICE)
+    ;
+
+    public static class Constant {
+        public static final String NOTIFICATION_SERVICE = "alarm-topic";
+        public static final String CHAT_SERVICE = "chat-topic";
+        public static final String AUCTION_POST_SERVICE = "new-auction-post-topic";
+        public static final String PAYMENT_SERVICE = "event-preview-topic";
+    }
+
+    private final String topic;
+}
