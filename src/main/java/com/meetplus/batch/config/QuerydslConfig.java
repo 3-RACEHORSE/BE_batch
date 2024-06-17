@@ -2,17 +2,24 @@ package com.meetplus.batch.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class QuerydslConfig {
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Bean
-    public JPAQueryFactory jpaQueryFactory() {
-        return new JPAQueryFactory(entityManager);
+    public JPAQueryFactory batchJpaQueryFactory(@Qualifier("batchEntityManagerFactory") EntityManagerFactory batchEntityManagerFactory) {
+        EntityManager batchEntityManager = batchEntityManagerFactory.createEntityManager();
+        return new JPAQueryFactory(batchEntityManager);
+    }
+
+    @Bean
+    public JPAQueryFactory paymentJpaQueryFactory(@Qualifier("paymentEntityManagerFactory") EntityManagerFactory paymentEntityManagerFactory) {
+        EntityManager paymentEntityManager = paymentEntityManagerFactory.createEntityManager();
+        return new JPAQueryFactory(paymentEntityManager);
     }
 }

@@ -6,9 +6,14 @@ spring:
   config:
     import: optional:configserver:${CONFIG_SERVER_URL}
 
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   batch:
     job:
-      name: beforeEventStartJob
+      name: updatePaymentStatusJob
 
   cloud:
     config:
