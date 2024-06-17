@@ -30,6 +30,7 @@ public class QuartzJobLauncher extends QuartzJobBean {
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         try{
+            log.info("quartz job started");
             Job job = jobLocator.getJob(jobName);
             JobParameters jobParameters = new JobParametersBuilder()
                 .addDate("requestDate", paymentDeadLine)
