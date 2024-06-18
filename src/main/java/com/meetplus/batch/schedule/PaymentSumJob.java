@@ -6,7 +6,6 @@ import com.meetplus.batch.infrastructure.payment.BankRepository;
 import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,6 @@ import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -78,7 +76,7 @@ public class PaymentSumJob {
     @Bean
     @StepScope
     public ItemProcessor<String, Bank> paymentSumProcessor(
-        ) {
+    ) {
         return auctionUuid -> {
             try {
                 BigDecimal totalAmount = paymentRepository.getTotalAmountByAuctionUuid(
@@ -105,8 +103,7 @@ public class PaymentSumJob {
                     return null;
                 }
             } catch (Exception e) {
-                System.err.println("Error processing auctionUuid: " + auctionUuid);
-                e.printStackTrace();
+                log.info("Error processing auctionUuid: {}", e.getMessage());
                 return null;
             }
         };
