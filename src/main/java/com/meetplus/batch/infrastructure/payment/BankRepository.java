@@ -1,6 +1,6 @@
-package com.meetplus.batch.infrastructure;
+package com.meetplus.batch.infrastructure.payment;
 
-import com.meetplus.batch.domain.Bank;
+import com.meetplus.batch.domain.payment.Bank;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

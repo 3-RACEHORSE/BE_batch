@@ -1,14 +1,16 @@
 package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.common.PaymentStatus;
-import com.meetplus.batch.domain.Payment;
-import com.meetplus.batch.infrastructure.PaymentRepository;
+import com.meetplus.batch.domain.payment.Payment;
+import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -33,9 +35,9 @@ public class PaymentCancelJob {
 
     @Autowired
     public PaymentCancelJob(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager,
+        @Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
         PaymentRepository paymentRepository,
-        EntityManagerFactory entityManagerFactory) {
+        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.paymentRepository = paymentRepository;
@@ -92,9 +94,17 @@ public class PaymentCancelJob {
 
     @Bean
     @Qualifier("updatePaymentStatusJob")
-    public Job updatePaymentStatusJob(@Qualifier("updatePaymentStatusStep") Step updatePaymentStatusStep) {
+    public Job updatePaymentStatusJob(
+        @Qualifier("updatePaymentStatusStep") Step updatePaymentStatusStep) {
         return new JobBuilder("updatePaymentStatusJob", jobRepository)
-            .start(updatePaymentStatusStep)
+            .start(updatePaymentStatusStep())
             .build();
+    }
+
+    @Bean
+    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
+        JobRegistryBeanPostProcessor jobProcessor = new JobRegistryBeanPostProcessor();
+        jobProcessor.setJobRegistry(jobRegistry);
+        return jobProcessor;
     }
 }

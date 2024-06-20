@@ -1,16 +1,18 @@
 package com.meetplus.batch.schedule;
 
-import com.meetplus.batch.domain.Bank;
-import com.meetplus.batch.infrastructure.BankRepository;
-import com.meetplus.batch.infrastructure.PaymentRepository;
+import com.meetplus.batch.common.CustomJobParameter;
+import com.meetplus.batch.domain.payment.Bank;
+import com.meetplus.batch.infrastructure.payment.BankRepository;
+import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -33,30 +35,31 @@ public class PaymentSumJob {
     private final PaymentRepository paymentRepository;
     private final BankRepository bankRepository;
     private final EntityManagerFactory entityManagerFactory;
-    private final JobParameters jobParameters;
+    private final CustomJobParameter customJobParameter;
 
     @Autowired
     public PaymentSumJob(JobRepository jobRepository,
-        PlatformTransactionManager transactionManager,
+        @Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
         PaymentRepository paymentRepository,
         BankRepository bankRepository,
-        EntityManagerFactory entityManagerFactory,
-        JobParameters jobParameters) {
+        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory,
+        CustomJobParameter customJobParameter) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.paymentRepository = paymentRepository;
         this.bankRepository = bankRepository;
         this.entityManagerFactory = entityManagerFactory;
-        this.jobParameters = jobParameters;
+        this.customJobParameter = customJobParameter;
     }
 
 
     @Bean
+    @StepScope
     public ItemReader<String> paymentSumReader() {
         return new ItemReader<String>() {
-            private List<String> auctionUuids = paymentRepository.findAuctionUuidsByDateRange(
-                jobParameters.getLocalDateTime("startTime"),
-                jobParameters.getLocalDateTime("endTime"));
+            private List<String> auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
+                customJobParameter.getStartTime(),
+                customJobParameter.getEndTime());
             private int nextIndex = 0;
 
             @Override
@@ -71,13 +74,15 @@ public class PaymentSumJob {
     }
 
     @Bean
-    public ItemProcessor<String, Bank> paymentSumProcessor() {
+    @StepScope
+    public ItemProcessor<String, Bank> paymentSumProcessor(
+    ) {
         return auctionUuid -> {
             try {
                 BigDecimal totalAmount = paymentRepository.getTotalAmountByAuctionUuid(
                     auctionUuid,
-                    jobParameters.getLocalDateTime("startTime"),
-                    jobParameters.getLocalDateTime("endTime")
+                    customJobParameter.getStartTime(),
+                    customJobParameter.getEndTime()
                 );
                 Optional<Bank> bankOpt = bankRepository.findByAuctionUuid(auctionUuid);
                 if (bankOpt.isPresent()) {
@@ -98,8 +103,7 @@ public class PaymentSumJob {
                     return null;
                 }
             } catch (Exception e) {
-                System.err.println("Error processing auctionUuid: " + auctionUuid);
-                e.printStackTrace();
+                log.info("Error processing auctionUuid: {}", e.getMessage());
                 return null;
             }
         };
@@ -113,6 +117,7 @@ public class PaymentSumJob {
     }
 
     @Bean
+    @JobScope
     @Qualifier("sumPaymentAmountPaidStep")
     public Step sumPaymentAmountPaidStep() {
         return new StepBuilder("sumPaymentAmountPaidStep", jobRepository)
@@ -125,7 +130,8 @@ public class PaymentSumJob {
 
     @Bean
     @Qualifier("sumPaymentAmountPaidJob")
-    public Job sumPaymentAmountPaidJob(@Qualifier("sumPaymentAmountPaidStep") Step sumPaymentAmountPaidStep) {
+    public Job sumPaymentAmountPaidJob(
+        @Qualifier("sumPaymentAmountPaidStep") Step sumPaymentAmountPaidStep) {
         return new JobBuilder("sumPaymentAmountPaidJob", jobRepository)
             .start(sumPaymentAmountPaidStep)
             .build();

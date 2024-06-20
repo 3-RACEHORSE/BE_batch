@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +22,20 @@ import java.util.Map;
 
 @Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class BeforeEventStartJob {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final KafkaProducerCluster producer;
+
+    @Autowired
+    public BeforeEventStartJob(JobRepository jobRepository,
+        @Qualifier("batchTransactionManager") PlatformTransactionManager transactionManager,
+        KafkaProducerCluster producer) {
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.producer = producer;
+    }
 
     @Bean
     @Qualifier("eventPreviewStep")

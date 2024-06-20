@@ -1,4 +1,4 @@
-package com.meetplus.batch.domain;
+package com.meetplus.batch.domain.payment;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -15,7 +15,7 @@ import com.querydsl.core.types.Path;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QPayment extends EntityPathBase<Payment> {
 
-    private static final long serialVersionUID = 1300250032L;
+    private static final long serialVersionUID = 624406472L;
 
     public static final QPayment payment = new QPayment("payment");
 

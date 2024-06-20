@@ -1,18 +1,19 @@
 package com.meetplus.batch;
 
+import java.util.TimeZone;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.util.TimeZone;
-
+@EnableScheduling
 @SpringBootApplication
 public class BatchApplication {
 
-	public static void main(String[] args) {
-		// application 전체 timezone을 UTC로 설정
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    public static void main(String[] args) {
+        // application 전체 timezone을 UTC로 설정
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
-		SpringApplication.run(BatchApplication.class, args);
-	}
+        SpringApplication.run(BatchApplication.class, args);
+    }
 
 }
