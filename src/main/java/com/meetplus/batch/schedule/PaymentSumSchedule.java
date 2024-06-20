@@ -25,7 +25,7 @@ public class PaymentSumSchedule {
         this.sumPaymentAmountPaidJob = sumPaymentAmountPaidJob;
     }
 
-    @Scheduled(cron = "0 29 18 * * ?")
+    @Scheduled(cron = "0 03 09 * * ?")
     public void runJob() throws Exception {
         try {
             log.info(">>>>>>>> Running job");

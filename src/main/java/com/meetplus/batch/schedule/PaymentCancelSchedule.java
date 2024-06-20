@@ -34,23 +34,23 @@ public class PaymentCancelSchedule {
         this.jobRegistry = jobRegistry;
     }
 
-    @Bean
-    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(){
-        JobRegistryBeanPostProcessor jobProcessor = new JobRegistryBeanPostProcessor();
-        jobProcessor.setJobRegistry(jobRegistry);
-        return jobProcessor;
-    }
-
-
-    @Scheduled(cron = "0/3 0 0 * * ?")
+    @Scheduled(cron = "0 35 00 * * ?")
     public void runJob() throws Exception {
+        log.info("jobNames: {}",jobRegistry.getJobNames());
         try {
+            log.info("PaymentCancelSchedule의 runJob 실행");
             Job job = jobRegistry.getJob("updatePaymentStatusJob"); // job 이름
-            JobParametersBuilder jobParam = new JobParametersBuilder().addString("runId", UUID.randomUUID().toString());
-            jobLauncher.run(job, jobParam.toJobParameters());
+
+            if (job == null) {
+                log.error("updatePaymentStatusJob이 JobRegistry에 등록되어 있지 않습니다.");
+
+            }
+
+            JobParameters jobParameters = new JobParametersBuilder().addString("runId", UUID.randomUUID().toString()).toJobParameters();
+            jobLauncher.run(job, jobParameters);
         } catch (JobExecutionAlreadyRunningException | JobRestartException |
                  JobInstanceAlreadyCompleteException e) {
-            log.info(e.getMessage());
+            log.error("PaymentCancelSchedule의 runJob 실행 중 오류 발생: {}", e.getMessage());
         }
     }
 }
