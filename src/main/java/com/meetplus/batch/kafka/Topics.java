@@ -15,7 +15,7 @@ public enum Topics {
     public static class Constant {
         public static final String NOTIFICATION_SERVICE = "alarm-topic";
         public static final String CHAT_SERVICE = "chat-topic";
-        public static final String AUCTION_POST_SERVICE = "new-auction-post-topic";
+        public static final String AUCTION_POST_SERVICE = "auction-post-topic";
         public static final String PAYMENT_SERVICE = "event-preview-topic";
     }
 
