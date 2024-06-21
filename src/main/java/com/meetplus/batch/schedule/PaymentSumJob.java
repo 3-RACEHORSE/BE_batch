@@ -84,13 +84,16 @@ public class PaymentSumJob {
 	) {
 		return auctionUuid -> {
 			try {
+				log.info("Processing auctionUuid: {}", auctionUuid);
 				BigDecimal totalAmount = paymentRepository.getTotalAmountByAuctionUuid(
 					auctionUuid,
 					customJobParameter.getStartTime(),
 					customJobParameter.getEndTime()
 				);
+				log.info("Payment: auctionUuid: {}, totalAmount: {}", auctionUuid, totalAmount);
 				Optional<Bank> bankOpt = bankRepository.findByAuctionUuid(auctionUuid);
 				if (bankOpt.isPresent()) {
+					log.info("Bank.isPresent: auctionUuid: {}, totalAmount: {}", auctionUuid, totalAmount);
 					Bank bank = bankOpt.get();
 					return Bank.builder()
 						.id(bank.getId())
@@ -98,12 +101,14 @@ public class PaymentSumJob {
 						.donation(bank.getDonation().add(totalAmount))
 						.build();
 				} else if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
+					log.info("Bank.not present: auctionUuid: {}, totalAmount: {}", auctionUuid, totalAmount);
 					Bank bank = Bank.builder()
 						.auctionUuid(auctionUuid)
 						.donation(totalAmount)
 						.build();
 					bankRepository.save(bank);
-					producer.sendMessage(Topics.AUCTION_POST_SERVICE.getTopic(),
+					log.info("save-bank");
+					producer.sendMessage(Topics.Constant.AUCTION_POST_DONATION_UPDATE,
 						SaveDonationDto.builder()
 							.auctionUuid(auctionUuid)
 							.donation(totalAmount)
