@@ -9,7 +9,8 @@ public enum Topics {
     NOTIFICATION_SERVICE(Constant.NOTIFICATION_SERVICE),
     CHAT_SERVICE(Constant.CHAT_SERVICE),
     AUCTION_POST_SERVICE(Constant.AUCTION_POST_SERVICE),
-    PAYMENT_SERVICE(Constant.PAYMENT_SERVICE)
+    PAYMENT_SERVICE(Constant.PAYMENT_SERVICE),
+    EVENT_START_TOPIC(Constant.EVENT_START_TOPIC)
     ;
 
     public static class Constant {
@@ -18,6 +19,7 @@ public enum Topics {
         public static final String AUCTION_POST_SERVICE = "new-auction-post-topic";
         public static final String PAYMENT_SERVICE = "event-preview-topic";
         public static final String AUCTION_POST_DONATION_UPDATE = "auction-post-donation-update-topic";
+        public static final String EVENT_START_TOPIC = "event-start-topic";
     }
 
     private final String topic;
