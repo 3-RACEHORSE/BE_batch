@@ -1,4 +1,4 @@
-package com.meetplus.batch.schedule;
+package com.meetplus.batch.job;
 
 import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.payment.Payment;
