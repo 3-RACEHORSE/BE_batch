@@ -13,6 +13,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -58,8 +59,8 @@ public class PaymentSumJob {
     public ItemReader<String> paymentSumReader() {
         return new ItemReader<String>() {
             private List<String> auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
-                customJobParameter.getStartTime(),
-                customJobParameter.getEndTime());
+                customJobParameter.getPaymentJobStartTime(),
+                customJobParameter.getPaymentJobEndTime());
             private int nextIndex = 0;
 
             @Override
@@ -82,8 +83,8 @@ public class PaymentSumJob {
                 log.info("Processing auctionUuid: {}", auctionUuid);
                 BigDecimal totalAmount = paymentRepository.getTotalAmountByAuctionUuid(
                     auctionUuid,
-                    customJobParameter.getStartTime(),
-                    customJobParameter.getEndTime()
+                    customJobParameter.getPaymentJobStartTime(),
+                    customJobParameter.getPaymentJobEndTime()
                 );
                 Bank bank = Bank.builder()
                     .auctionUuid(auctionUuid)
@@ -114,6 +115,7 @@ public class PaymentSumJob {
             .reader(paymentSumReader())
             .processor(paymentSumProcessor())
             .writer(paymentSumWriter())
+            .allowStartIfComplete(true)
             .build();
     }
 
@@ -122,6 +124,7 @@ public class PaymentSumJob {
     public Job sumPaymentAmountPaidJob(
         @Qualifier("sumPaymentAmountPaidStep") Step sumPaymentAmountPaidStep) {
         return new JobBuilder("sumPaymentAmountPaidJob", jobRepository)
+            .incrementer(new RunIdIncrementer())
             .start(sumPaymentAmountPaidStep)
             .build();
     }
