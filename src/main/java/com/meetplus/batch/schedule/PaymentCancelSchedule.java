@@ -1,5 +1,6 @@
 package com.meetplus.batch.schedule;
 
+import com.meetplus.batch.common.DateRangeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -34,16 +35,18 @@ public class PaymentCancelSchedule {
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "0 0 5 * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void runJob() {
-        JobParameters jobParameters = new JobParametersBuilder().addLong("paymentCancelTime",
-            System.currentTimeMillis()).toJobParameters();
+        JobParameters jobParameters = new JobParametersBuilder()
+            .addString("paymentJobStartTime", DateRangeUtil.getStartTime(2).toString())
+            .addString("paymentJobEndTime", DateRangeUtil.getEndTime(2).toString())
+            .addLong("paymentCancelTime", System.currentTimeMillis()).toJobParameters();
 
         //중단 또는 실패한 직전 job 재실행
         JobInstance jobInstance = jobExplorer.getLastJobInstance("updatePaymentStatusJob");
         if (jobInstance != null) {
             JobExecution jobExecution = jobExplorer.getLastJobExecution(jobInstance);
-            if (jobExecution != null && 
+            if (jobExecution != null &&
                 (jobExecution.getStatus() == BatchStatus.STOPPED ||
                     jobExecution.getStatus() == BatchStatus.FAILED
                 )) {

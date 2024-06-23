@@ -1,5 +1,6 @@
 package com.meetplus.batch.job;
 
+import com.meetplus.batch.common.CustomJobParameter;
 import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.payment.Payment;
 import com.meetplus.batch.infrastructure.payment.PaymentRepository;
@@ -9,6 +10,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -31,19 +33,23 @@ public class PaymentCancelJob {
     private final PlatformTransactionManager transactionManager;
     private final PaymentRepository paymentRepository;
     private final EntityManagerFactory entityManagerFactory;
+    private final CustomJobParameter customJobParameter;
 
     @Autowired
     public PaymentCancelJob(JobRepository jobRepository,
         @Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
         PaymentRepository paymentRepository,
-        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory,
+        CustomJobParameter customJobParameter) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.paymentRepository = paymentRepository;
         this.entityManagerFactory = entityManagerFactory;
+        this.customJobParameter = customJobParameter;
     }
 
     @Bean
+    @JobScope
     public ItemReader<Payment> paymentCancelReader() {
         return new ItemReader<Payment>() {
             private Iterator<Payment> paymentsIterator;
@@ -51,8 +57,11 @@ public class PaymentCancelJob {
             @Override
             public Payment read() throws Exception {
                 if (paymentsIterator == null) {
-                    List<Payment> payments = paymentRepository.findByPaymentStatus(
-                        PaymentStatus.PENDING);
+                    List<Payment> payments = paymentRepository.getPaymentsByPaymentStatusAndBetweenStartTimeAndEndTime(
+                        PaymentStatus.PENDING,
+                        customJobParameter.getPaymentJobStartTime(),
+                        customJobParameter.getPaymentJobEndTime()
+                    );
                     paymentsIterator = payments.iterator();
                 }
 
@@ -81,6 +90,7 @@ public class PaymentCancelJob {
     }
 
     @Bean
+    @JobScope
     @Qualifier("updatePaymentStatusStep")
     public Step updatePaymentStatusStep() {
         return new StepBuilder("updatePaymentStatusStep", jobRepository)
