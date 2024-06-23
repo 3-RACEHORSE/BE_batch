@@ -9,9 +9,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -89,6 +88,7 @@ public class PaymentCancelJob {
             .reader(paymentCancelReader())
             .processor(paymentCancelProcessor())
             .writer(paymentCancelWriter())
+            .allowStartIfComplete(true)
             .build();
     }
 
@@ -97,14 +97,8 @@ public class PaymentCancelJob {
     public Job updatePaymentStatusJob(
         @Qualifier("updatePaymentStatusStep") Step updatePaymentStatusStep) {
         return new JobBuilder("updatePaymentStatusJob", jobRepository)
-            .start(updatePaymentStatusStep())
+            .incrementer(new RunIdIncrementer())
+            .start(updatePaymentStatusStep)
             .build();
-    }
-
-    @Bean
-    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
-        JobRegistryBeanPostProcessor jobProcessor = new JobRegistryBeanPostProcessor();
-        jobProcessor.setJobRegistry(jobRegistry);
-        return jobProcessor;
     }
 }
