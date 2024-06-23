@@ -1,6 +1,7 @@
 package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.kafka.dto.EventStartTimeDto;
+import com.meetplus.batch.state.ScheduleTimeEnum;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -34,7 +35,9 @@ public class BeforeEventStartSchedule {
     public void scheduleJob(EventStartTimeDto eventStartTimeDto) {
 
         // delay가 0이 되면 Job 실행
-        long delay = eventStartTimeDto.getEventStartTime() - System.currentTimeMillis();
+        long delay =
+            eventStartTimeDto.getEventStartTime() - ScheduleTimeEnum.BEFORE_EVENT_START_24.getTime()
+                - System.currentTimeMillis();
 
         // delay가 음수인 경우 즉시 실행
         if (delay < 0) {
