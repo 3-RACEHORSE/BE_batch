@@ -2,6 +2,8 @@ package com.meetplus.batch.infrastructure.payment;
 
 import static com.meetplus.batch.domain.payment.QPayment.payment;
 
+import com.meetplus.batch.common.PaymentStatus;
+import com.meetplus.batch.domain.payment.Payment;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,7 +22,8 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
     }
 
     @Override
-    public List<String> getAuctionUuidsByDateRange(LocalDateTime startTime,
+    public List<String> getAuctionUuidsByDateRange(
+        LocalDateTime startTime,
         LocalDateTime endTime) {
         return paymentQueryFactory
             .select(payment.auctionUuid)
@@ -40,5 +43,16 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
                 .and(payment.completionAt.between(startTime, endTime)))
             .fetchOne();
         return totalAmount != null ? totalAmount : BigDecimal.ZERO;
+    }
+
+    @Override
+    public List<Payment> getPaymentsByPaymentStatusAndBetweenStartTimeAndEndTime(
+        PaymentStatus paymentStatus, LocalDateTime startTime, LocalDateTime endTime) {
+        return paymentQueryFactory
+            .select(payment)
+            .from(payment)
+            .where(payment.paymentStatus.eq(paymentStatus)
+                .and(payment.createdAt.between(startTime, endTime)))
+            .fetch();
     }
 }
