@@ -1,6 +1,7 @@
 package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.common.DateRangeUtil;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -34,14 +35,12 @@ public class PaymentSumSchedule {
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "0 0 5 * * ?")
+    @Scheduled(cron = "0 0 5 * * ?", zone = "Asia/Seoul")
     public void runJob() {
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("paymentJobStartTime", DateRangeUtil.getStartTime(5).toString())
             .addString("paymentJobEndTime", DateRangeUtil.getEndTime(5).toString())
-            .addString("paymentSumTime",
-                String.valueOf(System.currentTimeMillis()))
-            .toJobParameters();
+            .addString("paymentSumUuid", UUID.randomUUID().toString()).toJobParameters();
 
         JobInstance jobInstance = jobExplorer.getLastJobInstance("sumPaymentAmountPaidJob");
         if (jobInstance != null) {
@@ -55,7 +54,7 @@ public class PaymentSumSchedule {
             }
         }
 
-        log.info(">>>>>>> run updatePaymentStatusJob");
+        log.info(">>>>>>> run sumPaymentStatusJob");
         runSumPaymentAmountPaidJob(jobParameters);
     }
 

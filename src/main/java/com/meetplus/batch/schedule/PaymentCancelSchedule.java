@@ -1,6 +1,7 @@
 package com.meetplus.batch.schedule;
 
 import com.meetplus.batch.common.DateRangeUtil;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -15,34 +16,38 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@EnableScheduling
 public class PaymentCancelSchedule {
 
     private final JobLauncher jobLauncher;
     private final Job updatePaymentStatusJob;
+    private final Job sumPaymentAmountPaidJob;
     private final JobExplorer jobExplorer;
 
     public PaymentCancelSchedule(JobLauncher jobLauncher,
         @Qualifier("updatePaymentStatusJob") Job updatePaymentStatusJob,
+        @Qualifier("sumPaymentAmountPaidJob") Job sumPaymentAmountPaidJob,
         JobExplorer jobExplorer
     ) {
         this.jobLauncher = jobLauncher;
         this.updatePaymentStatusJob = updatePaymentStatusJob;
+        this.sumPaymentAmountPaidJob = sumPaymentAmountPaidJob;
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "0 0 2 * * ?")
-    public void runJob() {
+    @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Seoul")
+    public void runJob() throws Exception {
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("paymentJobStartTime", DateRangeUtil.getStartTime(2).toString())
             .addString("paymentJobEndTime", DateRangeUtil.getEndTime(2).toString())
-            .addLong("paymentCancelTime", System.currentTimeMillis()).toJobParameters();
+            .addString("paymentCancelUuid", UUID.randomUUID().toString()).toJobParameters();
 
-        //중단 또는 실패한 직전 job 재실행
         JobInstance jobInstance = jobExplorer.getLastJobInstance("updatePaymentStatusJob");
         if (jobInstance != null) {
             JobExecution jobExecution = jobExplorer.getLastJobExecution(jobInstance);
@@ -51,16 +56,15 @@ public class PaymentCancelSchedule {
                     jobExecution.getStatus() == BatchStatus.FAILED
                 )) {
                 log.info(">>>>>>> run stopped or failed updatePaymentStatusJob");
-                runUpdatePaymentStatusJob(jobExecution.getJobParameters());
+                runUpdatePaymentAmountPaidJob(jobParameters);
             }
         }
 
-        //예정된 job 실행
         log.info(">>>>>>> run updatePaymentStatusJob");
-        runUpdatePaymentStatusJob(jobParameters);
+        runUpdatePaymentAmountPaidJob(jobParameters);
     }
 
-    private void runUpdatePaymentStatusJob(JobParameters jobParameters) {
+    private void runUpdatePaymentAmountPaidJob(JobParameters jobParameters) {
         try {
             jobLauncher.run(updatePaymentStatusJob, jobParameters);
         } catch (JobExecutionAlreadyRunningException | JobRestartException |
