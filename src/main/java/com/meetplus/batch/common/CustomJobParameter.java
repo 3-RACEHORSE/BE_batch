@@ -10,6 +10,7 @@ public class CustomJobParameter {
     private LocalDateTime startTime = DateRangeUtil.getStartTime();
     @Value("#{jobParameters['endTime']}")
     private LocalDateTime endTime = DateRangeUtil.getEndTime();
+
 }
 
 

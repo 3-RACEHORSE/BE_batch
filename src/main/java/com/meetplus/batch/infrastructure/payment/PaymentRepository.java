@@ -14,4 +14,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, Payment
 
     @Query("SELECT p FROM Payment p WHERE p.completionAt BETWEEN :start AND :end")
     List<Payment> findAllByCompletionAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+//    @Query("SELECT p FROM Payment p WHERE p.completionAt BETWEEN :start AND :end")
+//    List<Payment> findAllByCompletionAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

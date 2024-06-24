@@ -2,6 +2,7 @@ package com.meetplus.batch.infrastructure.payment;
 
 import static com.meetplus.batch.domain.payment.QPayment.payment;
 
+import com.meetplus.batch.common.PaymentStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -40,5 +41,14 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
                 .and(payment.completionAt.between(startTime, endTime)))
             .fetchOne();
         return totalAmount != null ? totalAmount : BigDecimal.ZERO;
+    }
+
+    @Override
+    public List<String> getMemberUuidsByAuctionUuidAndPaymentStatus(String auctionUuid, PaymentStatus status) {
+        return paymentQueryFactory.select(payment.memberUuid)
+            .from(payment)
+            .where(payment.auctionUuid.eq(auctionUuid)
+                .and(payment.paymentStatus.eq(status)))
+            .fetch();
     }
 }
