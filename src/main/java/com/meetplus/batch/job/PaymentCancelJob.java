@@ -50,28 +50,8 @@ public class PaymentCancelJob {
 
     @Bean
     @JobScope
-    public ItemReader<Payment> paymentCancelReader() {
-        return new ItemReader<Payment>() {
-            private Iterator<Payment> paymentsIterator;
-
-            @Override
-            public Payment read() throws Exception {
-                if (paymentsIterator == null) {
-                    List<Payment> payments = paymentRepository.getPaymentsByPaymentStatusAndBetweenStartTimeAndEndTime(
-                        PaymentStatus.PENDING,
-                        customJobParameter.getPaymentJobStartTime(),
-                        customJobParameter.getPaymentJobEndTime()
-                    );
-                    paymentsIterator = payments.iterator();
-                }
-
-                if (paymentsIterator.hasNext()) {
-                    return paymentsIterator.next();
-                } else {
-                    return null; // 더 이상 읽을 데이터가 없음
-                }
-            }
-        };
+    public PaymentCancelItemReader paymentCancelReader() {
+        return new PaymentCancelItemReader(paymentRepository, customJobParameter);
     }
 
     @Bean
