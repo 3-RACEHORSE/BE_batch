@@ -27,17 +27,14 @@ public class PaymentCancelSchedule {
 
     private final JobLauncher jobLauncher;
     private final Job updatePaymentStatusJob;
-    private final Job sumPaymentAmountPaidJob;
     private final JobExplorer jobExplorer;
 
     public PaymentCancelSchedule(JobLauncher jobLauncher,
         @Qualifier("updatePaymentStatusJob") Job updatePaymentStatusJob,
-        @Qualifier("sumPaymentAmountPaidJob") Job sumPaymentAmountPaidJob,
         JobExplorer jobExplorer
     ) {
         this.jobLauncher = jobLauncher;
         this.updatePaymentStatusJob = updatePaymentStatusJob;
-        this.sumPaymentAmountPaidJob = sumPaymentAmountPaidJob;
         this.jobExplorer = jobExplorer;
     }
 
