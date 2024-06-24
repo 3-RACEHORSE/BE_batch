@@ -1,5 +1,6 @@
-package com.meetplus.batch.schedule;
+package com.meetplus.batch.job;
 
+import com.meetplus.batch.common.CustomJobParameter;
 import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.payment.Payment;
 import com.meetplus.batch.infrastructure.payment.PaymentRepository;
@@ -9,9 +10,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -32,38 +33,25 @@ public class PaymentCancelJob {
     private final PlatformTransactionManager transactionManager;
     private final PaymentRepository paymentRepository;
     private final EntityManagerFactory entityManagerFactory;
+    private final CustomJobParameter customJobParameter;
 
     @Autowired
     public PaymentCancelJob(JobRepository jobRepository,
         @Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
         PaymentRepository paymentRepository,
-        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory,
+        CustomJobParameter customJobParameter) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.paymentRepository = paymentRepository;
         this.entityManagerFactory = entityManagerFactory;
+        this.customJobParameter = customJobParameter;
     }
 
     @Bean
-    public ItemReader<Payment> paymentCancelReader() {
-        return new ItemReader<Payment>() {
-            private Iterator<Payment> paymentsIterator;
-
-            @Override
-            public Payment read() throws Exception {
-                if (paymentsIterator == null) {
-                    List<Payment> payments = paymentRepository.findByPaymentStatus(
-                        PaymentStatus.PENDING);
-                    paymentsIterator = payments.iterator();
-                }
-
-                if (paymentsIterator.hasNext()) {
-                    return paymentsIterator.next();
-                } else {
-                    return null; // 더 이상 읽을 데이터가 없음
-                }
-            }
-        };
+    @JobScope
+    public PaymentCancelItemReader paymentCancelReader() {
+        return new PaymentCancelItemReader(paymentRepository, customJobParameter);
     }
 
     @Bean
@@ -82,6 +70,7 @@ public class PaymentCancelJob {
     }
 
     @Bean
+    @JobScope
     @Qualifier("updatePaymentStatusStep")
     public Step updatePaymentStatusStep() {
         return new StepBuilder("updatePaymentStatusStep", jobRepository)
@@ -89,6 +78,7 @@ public class PaymentCancelJob {
             .reader(paymentCancelReader())
             .processor(paymentCancelProcessor())
             .writer(paymentCancelWriter())
+            .allowStartIfComplete(true)
             .build();
     }
 
@@ -97,14 +87,8 @@ public class PaymentCancelJob {
     public Job updatePaymentStatusJob(
         @Qualifier("updatePaymentStatusStep") Step updatePaymentStatusStep) {
         return new JobBuilder("updatePaymentStatusJob", jobRepository)
-            .start(updatePaymentStatusStep())
+            .incrementer(new RunIdIncrementer())
+            .start(updatePaymentStatusStep)
             .build();
-    }
-
-    @Bean
-    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
-        JobRegistryBeanPostProcessor jobProcessor = new JobRegistryBeanPostProcessor();
-        jobProcessor.setJobRegistry(jobRegistry);
-        return jobProcessor;
     }
 }
