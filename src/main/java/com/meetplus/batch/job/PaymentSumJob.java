@@ -1,23 +1,22 @@
 package com.meetplus.batch.job;
 
+import com.meetplus.batch.application.dto.AuctionTotalAmountDto;
 import com.meetplus.batch.common.CustomJobParameter;
 import com.meetplus.batch.domain.payment.Bank;
 import com.meetplus.batch.infrastructure.payment.BankRepository;
 import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,39 +52,24 @@ public class PaymentSumJob {
         this.customJobParameter = customJobParameter;
     }
 
-
     @Bean
-    @StepScope
-    public ItemReader<String> paymentSumReader() {
-        return new ItemReader<String>() {
-            private List<String> auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
-                customJobParameter.getPaymentJobStartTime(),
-                customJobParameter.getPaymentJobEndTime());
-            private int nextIndex = 0;
-
-            @Override
-            public String read() throws Exception {
-                if (nextIndex < auctionUuids.size()) {
-                    return auctionUuids.get(nextIndex++);
-                } else {
-                    return null;
-                }
-            }
-        };
+    @JobScope
+    public PaymentSumItemReader paymentSumReader() {
+        return new PaymentSumItemReader(paymentRepository, customJobParameter);
     }
 
     @Bean
-    @StepScope
-    public ItemProcessor<String, Bank> paymentSumProcessor(
+    @JobScope
+    public ItemProcessor<AuctionTotalAmountDto, Bank> paymentSumProcessor(
     ) {
-        return auctionUuid -> {
+        return auctionTotalAmountDto -> {
             try {
-                log.info("Processing auctionUuid: {}", auctionUuid);
-                BigDecimal totalAmount = paymentRepository.getTotalAmountByAuctionUuid(
-                    auctionUuid,
-                    customJobParameter.getPaymentJobStartTime(),
-                    customJobParameter.getPaymentJobEndTime()
-                );
+                String auctionUuid = auctionTotalAmountDto.getAuctionUuid();
+                BigDecimal totalAmount = auctionTotalAmountDto.getTotalAmount();
+                Optional<Bank> bankOpt = bankRepository.findByAuctionUuid(auctionUuid);
+                if (bankOpt.isPresent()) {
+                    return null;
+                }
                 Bank bank = Bank.builder()
                     .auctionUuid(auctionUuid)
                     .donation(totalAmount)
@@ -93,7 +77,7 @@ public class PaymentSumJob {
                 bankRepository.save(bank);
                 return bank;
             } catch (Exception e) {
-                log.info("Error processing auctionUuid: {}", e.getMessage());
+                log.info("processor error: {}", e.getMessage());
                 return null;
             }
         };
@@ -111,7 +95,7 @@ public class PaymentSumJob {
     @Qualifier("sumPaymentAmountPaidStep")
     public Step sumPaymentAmountPaidStep() {
         return new StepBuilder("sumPaymentAmountPaidStep", jobRepository)
-            .<String, Bank>chunk(10, transactionManager)
+            .<AuctionTotalAmountDto, Bank>chunk(10, transactionManager)
             .reader(paymentSumReader())
             .processor(paymentSumProcessor())
             .writer(paymentSumWriter())
