@@ -44,6 +44,9 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final NumberPath<java.math.BigDecimal> price = createNumber("price", java.math.BigDecimal.class);
 
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+
     public QPayment(String variable) {
         super(Payment.class, forVariable(variable));
     }

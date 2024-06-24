@@ -30,6 +30,9 @@ public class QBank extends EntityPathBase<Bank> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+
     public QBank(String variable) {
         super(Bank.class, forVariable(variable));
     }
