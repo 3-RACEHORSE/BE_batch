@@ -60,4 +60,21 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
             .where(builder)
             .fetch();
     }
+
+    @Override
+    public List<String> getMemberUuidsByAuctionUuidAndPaymentStatus(String auctionUuid, PaymentStatus status) {
+        return paymentQueryFactory.select(payment.memberUuid)
+            .from(payment)
+            .where(payment.auctionUuid.eq(auctionUuid)
+                .and(payment.paymentStatus.eq(status)))
+            .fetch();
+    }
+
+    @Override
+    public List<String> getAuctionUuidsByDateRange(LocalDateTime startTime, LocalDateTime endTime) {
+        return paymentQueryFactory.select(payment.auctionUuid).distinct()
+            .from(payment)
+            .where(payment.completionAt.between(startTime,endTime))
+            .fetch();
+    }
 }
