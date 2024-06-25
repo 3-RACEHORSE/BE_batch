@@ -20,4 +20,4 @@ COPY --from=build ${EXTRACTED}/spring-boot-loader/ ./
 COPY --from=build ${EXTRACTED}/snapshot-dependencies/ ./
 COPY --from=build ${EXTRACTED}/application/ ./
 
-ENTRYPOINT ["java","-jar","batch-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","org.springframework.boot.loader.JarLauncher"]
