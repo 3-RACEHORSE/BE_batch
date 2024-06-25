@@ -24,7 +24,7 @@ public class SendToChatSchedule {
         this.sendToChatDataJob = sendToChatDataJob;
     }
 
-    @Scheduled(cron = "0 51 08 * * ?")
+    @Scheduled(cron = "0 00 09 * * ?", zone = "Asia/Seoul")
     public void runJob() throws Exception {
         try {
             log.info(">>>>>>>> Running job");

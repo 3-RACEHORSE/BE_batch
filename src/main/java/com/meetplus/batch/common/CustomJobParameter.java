@@ -6,13 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Getter
 public class CustomJobParameter {
-<<<<<<< HEAD
-    @Value("#{jobParameters['startTime']}")
-    private LocalDateTime startTime = DateRangeUtil.getStartTime();
-    @Value("#{jobParameters['endTime']}")
-    private LocalDateTime endTime = DateRangeUtil.getEndTime();
-
-=======
     private LocalDateTime paymentJobStartTime;
     private LocalDateTime paymentJobEndTime;
 
@@ -29,7 +22,6 @@ public class CustomJobParameter {
             this.paymentJobEndTime = LocalDateTime.parse(paymentJobEndTime);
         }
     }
->>>>>>> cb6f6de42e457c20a40ac8905edffe9783767da5
 }
 
 

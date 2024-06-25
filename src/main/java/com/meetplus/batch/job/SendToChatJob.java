@@ -1,6 +1,7 @@
-package com.meetplus.batch.schedule;
+package com.meetplus.batch.job;
 
 import com.meetplus.batch.common.CustomJobParameter;
+import com.meetplus.batch.common.DateRangeUtil;
 import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.payment.Bank;
 import com.meetplus.batch.domain.payment.Payment;
@@ -43,6 +44,8 @@ public class SendToChatJob {
     private final CustomJobParameter customJobParameter;
     private final KafkaProducerCluster producer;
 
+    private List<String> auctionUuids;
+
     @Autowired
     public SendToChatJob(JobRepository jobRepository,
         @Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
@@ -60,17 +63,16 @@ public class SendToChatJob {
     @Bean
     @StepScope
     public ItemReader<String> sendToChatReader() {
-        List<String> auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
-            customJobParameter.getStartTime().minusHours(3),
-            customJobParameter.getEndTime().minusHours(3));
-        log.info("auctionUuids: {}", auctionUuids);
-        log.info("시작시간: {}", customJobParameter.getStartTime().minusHours(3));
-        log.info("마감시간: {}", customJobParameter.getEndTime().minusHours(3));
+        if (auctionUuids == null) {
+            auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
+                DateRangeUtil.getStartTime(2).minusDays(1),
+                DateRangeUtil.getStartTime(2));
+//            log.info("auctionUuids: {}", auctionUuids);
+//            log.info("시작시간: {}", DateRangeUtil.getStartTime(2).minusDays(1));
+//            log.info("마감시간: {}", DateRangeUtil.getStartTime(2));
+        }
 
         return new ItemReader<String>() {
-            private List<String> auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
-                customJobParameter.getStartTime().minusDays(1).minusHours(3),
-                customJobParameter.getEndTime().minusDays(1).minusHours(3));
             private int nextIndex = 0;
 
             @Override
@@ -86,20 +88,19 @@ public class SendToChatJob {
 
     @Bean
     @StepScope
-    public ItemProcessor<String, Void> sendToChatProcessor(
-    ) {
+    public ItemProcessor<String, Void> sendToChatProcessor() {
         return auctionUuid -> {
             try {
                 log.info("Processing auctionUuid: {}", auctionUuid);
-                List<String> memberUuids = paymentRepository.getMemberUuidsByAuctionUuidAndPaymentStatus(auctionUuid,PaymentStatus.COMPLETE);
-                log.info("MemberUuids: {}", memberUuids.toString());
+                List<String> memberUuids = paymentRepository.getMemberUuidsByAuctionUuidAndPaymentStatus(auctionUuid, PaymentStatus.COMPLETE);
+//                log.info("MemberUuids: {}", memberUuids.toString());
 
-                    producer.sendMessage(Constant.SEND_TO_AUCTION_FOR_CREATE_CHATROOM,
-                        SendToChatDto.builder()
-                            .auctionUuid(auctionUuid)
-                            .memberUuids(memberUuids)
-                            .build());
-                    return null;
+                producer.sendMessage(Constant.SEND_TO_AUCTION_FOR_CREATE_CHATROOM,
+                    SendToChatDto.builder()
+                        .auctionUuid(auctionUuid)
+                        .memberUuids(memberUuids)
+                        .build());
+                return null;
             } catch (Exception e) {
                 log.info("Error processing auctionUuid: {}", e.getMessage());
                 return null;
@@ -133,5 +134,4 @@ public class SendToChatJob {
             .start(sendToChatStep) // 시작할 Step을 지정합니다.
             .build();
     }
-
 }
