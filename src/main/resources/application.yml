@@ -10,10 +10,6 @@ spring:
     config:
       profile: ${PROFILE}
 
-  batch:
-    job:
-      enabled: false
-
 encrypt:
   key: ${ENCRYPT_KEY}
 
