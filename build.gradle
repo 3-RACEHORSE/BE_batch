@@ -66,6 +66,7 @@ dependencies {
 	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 	// springboot actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 }
 
