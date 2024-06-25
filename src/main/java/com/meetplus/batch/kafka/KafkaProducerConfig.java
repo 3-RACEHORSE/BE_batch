@@ -22,7 +22,7 @@ public class KafkaProducerConfig {
     private String bootstrapAddress;
 
     @Bean
-    public NewTopic myTopic() {
+    public NewTopic alarmTopic() {
         return TopicBuilder.name(Constant.ALARM_TOPIC)
             .partitions(1)
             .replicas(1)
@@ -31,7 +31,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public NewTopic myTopic2() {
+    public NewTopic auctionPostDonationUpdateTopic() {
         return TopicBuilder.name(Topics.Constant.AUCTION_POST_DONATION_UPDATE)
             .partitions(1)
             .replicas(1)
