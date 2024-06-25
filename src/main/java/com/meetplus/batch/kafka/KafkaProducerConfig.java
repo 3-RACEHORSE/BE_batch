@@ -21,6 +21,24 @@ public class KafkaProducerConfig {
     private String bootstrapAddress;
 
     @Bean
+    public NewTopic alarmTopic() {
+        return TopicBuilder.name(Topics.Constant.ALARM_TOPIC)
+            .partitions(1)
+            .replicas(1)
+            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
+            .build();
+    }
+
+    @Bean
+    public NewTopic auctionPostDonationUpdateTopic() {
+        return TopicBuilder.name(Topics.Constant.AUCTION_POST_DONATION_UPDATE)
+            .partitions(1)
+            .replicas(1)
+            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
+            .build();
+    }
+
+    @Bean
     public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
