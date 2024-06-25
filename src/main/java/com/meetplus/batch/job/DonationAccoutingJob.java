@@ -56,7 +56,7 @@ public class DonationAccoutingJob {
 
 	@Bean
 	@JobScope
-	public TotalDonationItemReader totalDonationItemReader() {
+	public TotalDonationItemReader totalDonationReader() {
 		return new TotalDonationItemReader(bankRepository, customJobParameter);
 	}
 
@@ -99,7 +99,7 @@ public class DonationAccoutingJob {
 	public Step totalDonationSettlementStep() {
 		return new StepBuilder("totalDonationSettlementStep", jobRepository)
 			.<TotalDonationDto, TotalDonationSettlement>chunk(10, transactionManager)
-			.reader(totalDonationItemReader())
+			.reader(totalDonationReader())
 			.processor(donationAccoutingProcessor())
 			.writer(totalSettlementWriter())
 			.allowStartIfComplete(true)

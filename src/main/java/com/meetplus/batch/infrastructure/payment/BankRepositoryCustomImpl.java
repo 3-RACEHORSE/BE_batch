@@ -29,7 +29,6 @@ public class BankRepositoryCustomImpl implements BankRepositoryCustom {
 				bank.donation.sum().coalesce(BigDecimal.ZERO) // 합계가 null인 경우 0으로 대체
 			))
 			.from(bank)
-			.groupBy(bank.auctionUuid)
 			.fetch();
 	}
 }

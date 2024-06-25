@@ -22,4 +22,10 @@ public class QuerydslConfig {
         EntityManager paymentEntityManager = paymentEntityManagerFactory.createEntityManager();
         return new JPAQueryFactory(paymentEntityManager);
     }
+
+    @Bean
+    public JPAQueryFactory BankJpaQueryFactory(@Qualifier("bankEntityManagerFactory") EntityManagerFactory bankEntityManagerFactory) {
+        EntityManager bankEntityManager = bankEntityManagerFactory.createEntityManager();
+        return new JPAQueryFactory(bankEntityManager);
+    }
 }
