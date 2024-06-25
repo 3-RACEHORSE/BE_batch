@@ -67,9 +67,9 @@ public class SendToChatJob {
             auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
                 DateRangeUtil.getStartTime(2).minusDays(1),
                 DateRangeUtil.getStartTime(2));
-//            log.info("auctionUuids: {}", auctionUuids);
-//            log.info("시작시간: {}", DateRangeUtil.getStartTime(2).minusDays(1));
-//            log.info("마감시간: {}", DateRangeUtil.getStartTime(2));
+            log.info("auctionUuids: {}", auctionUuids);
+            log.info("시작시간: {}", DateRangeUtil.getStartTime(2).minusDays(1));
+            log.info("마감시간: {}", DateRangeUtil.getStartTime(2));
         }
 
         return new ItemReader<String>() {
@@ -93,7 +93,7 @@ public class SendToChatJob {
             try {
                 log.info("Processing auctionUuid: {}", auctionUuid);
                 List<String> memberUuids = paymentRepository.getMemberUuidsByAuctionUuidAndPaymentStatus(auctionUuid, PaymentStatus.COMPLETE);
-//                log.info("MemberUuids: {}", memberUuids.toString());
+                log.info("MemberUuids: {}", memberUuids.toString());
 
                 producer.sendMessage(Constant.SEND_TO_AUCTION_FOR_CREATE_CHATROOM,
                     SendToChatDto.builder()
