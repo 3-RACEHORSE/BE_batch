@@ -1,5 +1,6 @@
 package com.meetplus.batch.kafka;
 
+import com.meetplus.batch.kafka.Topics.Constant;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -53,8 +54,8 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public NewTopic myTopic3() {
-        return TopicBuilder.name("send-to-auction-for-create-chatroom-topic")
+    public NewTopic sendToAuctionForCreateChatRoomTopic() {
+        return TopicBuilder.name(Constant.SEND_TO_AUCTION_FOR_CREATE_CHATROOM)
             .partitions(1)
             .replicas(1)
             .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
