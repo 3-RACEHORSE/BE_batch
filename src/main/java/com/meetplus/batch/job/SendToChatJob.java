@@ -37,6 +37,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @Slf4j
 public class SendToChatJob {
+
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final PaymentRepository paymentRepository;
@@ -68,8 +69,8 @@ public class SendToChatJob {
                 DateRangeUtil.getStartTime(2).minusDays(1),
                 DateRangeUtil.getStartTime(2));
 //            log.info("auctionUuids: {}", auctionUuids);
-//            log.info("시작시간: {}", DateRangeUtil.getStartTime(2).minusDays(1));
-//            log.info("마감시간: {}", DateRangeUtil.getStartTime(2));
+            log.info("시작시간: {}", DateRangeUtil.getStartTime(2).minusDays(1));
+            log.info("마감시간: {}", DateRangeUtil.getStartTime(2));
         }
 
         return new ItemReader<String>() {
@@ -92,14 +93,15 @@ public class SendToChatJob {
         return auctionUuid -> {
             try {
                 log.info("Processing auctionUuid: {}", auctionUuid);
-                List<String> memberUuids = paymentRepository.getMemberUuidsByAuctionUuidAndPaymentStatus(auctionUuid, PaymentStatus.COMPLETE);
+                List<String> memberUuids = paymentRepository.getMemberUuidsByAuctionUuidAndPaymentStatus(
+                    auctionUuid, PaymentStatus.COMPLETE);
 //                log.info("MemberUuids: {}", memberUuids.toString());
 
-                producer.sendMessage(Constant.SEND_TO_AUCTION_FOR_CREATE_CHATROOM,
-                    SendToChatDto.builder()
-                        .auctionUuid(auctionUuid)
-                        .memberUuids(memberUuids)
-                        .build());
+                SendToChatDto sendToChatDto = SendToChatDto.builder()
+                    .auctionUuid(auctionUuid)
+                    .memberUuids(memberUuids)
+                    .build();
+                producer.sendMessage(Constant.SEND_TO_AUCTION_POST_FOR_CREATE_CHATROOM, sendToChatDto);
                 return null;
             } catch (Exception e) {
                 log.info("Error processing auctionUuid: {}", e.getMessage());
