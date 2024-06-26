@@ -1,7 +1,6 @@
 package com.meetplus.batch.job;
 
 import com.meetplus.batch.application.dto.TotalDonationDto;
-import com.meetplus.batch.common.CustomJobParameter;
 import com.meetplus.batch.domain.payment.TotalDonationSettlement;
 import com.meetplus.batch.infrastructure.payment.BankRepository;
 import com.meetplus.batch.infrastructure.payment.TotalSettlementRepository;
@@ -11,7 +10,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -34,32 +32,27 @@ public class DonationTotalJob {
 	private final BankRepository bankRepository;
 	private final TotalSettlementRepository totalSettlementRepository;
 	private final EntityManagerFactory entityManagerFactory;
-	private final CustomJobParameter customJobParameter;
-
 
 	@Autowired
 	public DonationTotalJob(JobRepository jobRepository,
 		@Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
 		BankRepository bankRepository,
 		TotalSettlementRepository totalSettlementRepository,
-		@Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory,
-		CustomJobParameter customJobParameter) {
+		@Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
 		this.jobRepository = jobRepository;
 		this.transactionManager = transactionManager;
 		this.bankRepository = bankRepository;
 		this.totalSettlementRepository = totalSettlementRepository;
 		this.entityManagerFactory = entityManagerFactory;
-		this.customJobParameter = customJobParameter;
 	}
 
 	@Bean
-	@JobScope
 	public TotalDonationItemReader totalDonationReader() {
-		return new TotalDonationItemReader(bankRepository, customJobParameter);
+		log.info("totalDonationReader");
+		return new TotalDonationItemReader(bankRepository);
 	}
 
 	@Bean
-	@JobScope
 	public ItemProcessor<TotalDonationDto, TotalDonationSettlement> TotalDonationProcessor(
 	) {
 		return totalDonationDto -> {
@@ -72,17 +65,19 @@ public class DonationTotalJob {
 					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
 						.totalDonation(totalDonation)
 						.build();
+					log.info("totalDonationSettlement1: {}", totalDonationSettlement1.toString());
 					totalSettlementRepository.save(totalDonationSettlement1);
 					return totalDonationSettlement1;
 				}
-
-				TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
-					.id(totalDonationSettlement.get(0).getId())
-					.totalDonation(totalDonation)
-					.build();
-				log.info("totalDonationSettlement1: {}", totalDonationSettlement1);
-				totalSettlementRepository.save(totalDonationSettlement1);
-				return totalDonationSettlement1;
+				else {
+					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
+						.id(totalDonationSettlement.get(0).getId())
+						.totalDonation(totalDonation)
+						.build();
+					log.info("totalDonationSettlement1: {}", totalDonationSettlement1);
+					totalSettlementRepository.save(totalDonationSettlement1);
+					return null;
+				}
 			} catch (Exception e) {
 				log.info("processor error: {}", e.getMessage());
 				return null;
@@ -98,11 +93,10 @@ public class DonationTotalJob {
 	}
 
 	@Bean
-	@JobScope
 	@Qualifier("donationTotalStep")
 	public Step totalDonationStep() {
 		return new StepBuilder("donationTotalStep", jobRepository)
-			.<TotalDonationDto, TotalDonationSettlement>chunk(10, transactionManager)
+			.<TotalDonationDto, TotalDonationSettlement>chunk(1, transactionManager)
 			.reader(totalDonationReader())
 			.processor(TotalDonationProcessor())
 			.writer(totalSettlementWriter())

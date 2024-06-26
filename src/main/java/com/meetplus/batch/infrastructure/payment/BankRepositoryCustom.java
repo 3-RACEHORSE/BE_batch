@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface BankRepositoryCustom {
 
-	List<TotalDonationDto> getBankTotalAmounts();
+	TotalDonationDto getBankTotalAmounts();
 }

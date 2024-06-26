@@ -21,13 +21,13 @@ public class BankRepositoryCustomImpl implements BankRepositoryCustom {
 	}
 
 	@Override
-	public List<TotalDonationDto> getBankTotalAmounts() {
+	public TotalDonationDto getBankTotalAmounts() {
 		return bankQueryFactory
 			.select(Projections.constructor(
 				TotalDonationDto.class,
 				bank.donation.sum().coalesce(BigDecimal.ZERO) // 합계가 null인 경우 0으로 대체
 			))
 			.from(bank)
-			.fetch();
+			.fetchOne();
 	}
 }

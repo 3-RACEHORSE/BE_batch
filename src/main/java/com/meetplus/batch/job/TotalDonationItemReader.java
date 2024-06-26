@@ -1,7 +1,6 @@
 package com.meetplus.batch.job;
 
 import com.meetplus.batch.application.dto.TotalDonationDto;
-import com.meetplus.batch.common.CustomJobParameter;
 import com.meetplus.batch.infrastructure.payment.BankRepository;
 import java.util.Iterator;
 import java.util.List;
@@ -14,16 +13,15 @@ public class TotalDonationItemReader implements ItemReader<TotalDonationDto> {
 	private Iterator<TotalDonationDto> totalDonationDtoIterator;
 	private final BankRepository bankRepository;
 
-	public TotalDonationItemReader(BankRepository bankRepository,
-		CustomJobParameter customJobParameter) {
+	public TotalDonationItemReader(BankRepository bankRepository) {
 		this.bankRepository = bankRepository;
 	}
 
 	@Override
 	public TotalDonationDto read() throws Exception {
 		if (totalDonationDtoIterator == null) {
-			List<TotalDonationDto> totalDonationDtos = bankRepository.getBankTotalAmounts();
-			totalDonationDtoIterator = totalDonationDtos.iterator();
+			TotalDonationDto totalDonationDtos = bankRepository.getBankTotalAmounts();
+			totalDonationDtoIterator = List.of(totalDonationDtos).iterator();
 		}
 
 		if (totalDonationDtoIterator.hasNext()) {

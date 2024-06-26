@@ -34,12 +34,16 @@ public class DonationTotalSchedule {
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "0 17 14 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "20 38 21 * * ?", zone = "Asia/Seoul")
     public void runJob() {
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("donationTotalUuid", UUID.randomUUID().toString()).toJobParameters();
 
-        JobInstance jobInstance = jobExplorer.getLastJobInstance("totalDonationJob");
+        log.info("------------------------");
+        log.info("jobinstance: {}", jobExplorer.getLastJobInstance("donationTotalJob"));
+        log.info("------------------------");
+
+        JobInstance jobInstance = jobExplorer.getLastJobInstance("donationTotalJob");
         if (jobInstance != null) {
             JobExecution jobExecution = jobExplorer.getLastJobExecution(jobInstance);
             if (jobExecution != null &&
@@ -51,7 +55,7 @@ public class DonationTotalSchedule {
             }
         }
 
-        log.info(">>>>>>> run sumPaymentStatusJob");
+        log.info(">>>>>>> run DonationTotalStatusJob");
         runDonationTotalJob(jobParameters);
     }
 
