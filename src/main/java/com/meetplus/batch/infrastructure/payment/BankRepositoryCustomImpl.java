@@ -16,7 +16,7 @@ public class BankRepositoryCustomImpl implements BankRepositoryCustom {
 	private final JPAQueryFactory bankQueryFactory;
 
 	public BankRepositoryCustomImpl(
-		@Qualifier("BankJpaQueryFactory") JPAQueryFactory bankQueryFactory) {
+		@Qualifier("bankJpaQueryFactory") JPAQueryFactory bankQueryFactory) {
 		this.bankQueryFactory = bankQueryFactory;
 	}
 
@@ -25,7 +25,6 @@ public class BankRepositoryCustomImpl implements BankRepositoryCustom {
 		return bankQueryFactory
 			.select(Projections.constructor(
 				TotalDonationDto.class,
-				bank.auctionUuid,
 				bank.donation.sum().coalesce(BigDecimal.ZERO) // 합계가 null인 경우 0으로 대체
 			))
 			.from(bank)

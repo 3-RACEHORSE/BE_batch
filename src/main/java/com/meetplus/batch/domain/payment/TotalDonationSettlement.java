@@ -20,6 +20,7 @@ public class TotalDonationSettlement {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "total_settlement_id")
 	private Long id;
 	@Column(name = "total_donation", nullable = false)
 	private BigDecimal totalDonation;

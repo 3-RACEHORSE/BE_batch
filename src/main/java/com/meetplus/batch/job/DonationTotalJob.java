@@ -4,7 +4,6 @@ import com.meetplus.batch.application.dto.TotalDonationDto;
 import com.meetplus.batch.common.CustomJobParameter;
 import com.meetplus.batch.domain.payment.TotalDonationSettlement;
 import com.meetplus.batch.infrastructure.payment.BankRepository;
-import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import com.meetplus.batch.infrastructure.payment.TotalSettlementRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
@@ -28,7 +27,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @Slf4j
-public class DonationAccoutingJob {
+public class DonationTotalJob {
 
 	private final JobRepository jobRepository;
 	private final PlatformTransactionManager transactionManager;
@@ -39,12 +38,11 @@ public class DonationAccoutingJob {
 
 
 	@Autowired
-	public DonationAccoutingJob(JobRepository jobRepository,
-		@Qualifier("BankTransactionManager") PlatformTransactionManager transactionManager,
-		PaymentRepository paymentRepository,
+	public DonationTotalJob(JobRepository jobRepository,
+		@Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
 		BankRepository bankRepository,
 		TotalSettlementRepository totalSettlementRepository,
-		@Qualifier("BankEntityManagerFactory") EntityManagerFactory entityManagerFactory,
+		@Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory,
 		CustomJobParameter customJobParameter) {
 		this.jobRepository = jobRepository;
 		this.transactionManager = transactionManager;
@@ -62,21 +60,27 @@ public class DonationAccoutingJob {
 
 	@Bean
 	@JobScope
-	public ItemProcessor<TotalDonationDto, TotalDonationSettlement> donationAccoutingProcessor(
+	public ItemProcessor<TotalDonationDto, TotalDonationSettlement> TotalDonationProcessor(
 	) {
 		return totalDonationDto -> {
 			try {
 				BigDecimal totalDonation = totalDonationDto.getTotalDonation();
 				List<TotalDonationSettlement> totalDonationSettlement = totalSettlementRepository.findAll();
 
-				if(totalDonationSettlement.isEmpty()){
-					throw new Exception("totalDonationSettlement is empty");
+				if (totalDonationSettlement.isEmpty()) {
+					log.info("totalDonationSettlement is empty");
+					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
+						.totalDonation(totalDonation)
+						.build();
+					totalSettlementRepository.save(totalDonationSettlement1);
+					return totalDonationSettlement1;
 				}
 
 				TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
 					.id(totalDonationSettlement.get(0).getId())
 					.totalDonation(totalDonation)
 					.build();
+				log.info("totalDonationSettlement1: {}", totalDonationSettlement1);
 				totalSettlementRepository.save(totalDonationSettlement1);
 				return totalDonationSettlement1;
 			} catch (Exception e) {
@@ -95,24 +99,24 @@ public class DonationAccoutingJob {
 
 	@Bean
 	@JobScope
-	@Qualifier("totalDonationSettlementStep")
-	public Step totalDonationSettlementStep() {
-		return new StepBuilder("totalDonationSettlementStep", jobRepository)
+	@Qualifier("donationTotalStep")
+	public Step totalDonationStep() {
+		return new StepBuilder("donationTotalStep", jobRepository)
 			.<TotalDonationDto, TotalDonationSettlement>chunk(10, transactionManager)
 			.reader(totalDonationReader())
-			.processor(donationAccoutingProcessor())
+			.processor(TotalDonationProcessor())
 			.writer(totalSettlementWriter())
 			.allowStartIfComplete(true)
 			.build();
 	}
 
 	@Bean
-	@Qualifier("totalDonationSettlementJob")
+	@Qualifier("donationTotalJob")
 	public Job totalDonationSettlementJob(
-		@Qualifier("totalDonationSettlementStep") Step totalDonationSettlementStep) {
-		return new JobBuilder("totalDonationSettlementJob", jobRepository)
+		@Qualifier("donationTotalStep") Step totalDonationStep) {
+		return new JobBuilder("donationTotalJob", jobRepository)
 			.incrementer(new RunIdIncrementer())
-			.start(totalDonationSettlementStep)
+			.start(totalDonationStep)
 			.build();
 	}
 }
