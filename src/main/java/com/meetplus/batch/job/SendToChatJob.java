@@ -97,11 +97,11 @@ public class SendToChatJob {
                     auctionUuid, PaymentStatus.COMPLETE);
 //                log.info("MemberUuids: {}", memberUuids.toString());
 
-                SendToChatDto sendToChatDto = SendToChatDto.builder()
-                    .auctionUuid(auctionUuid)
-                    .memberUuids(memberUuids)
-                    .build();
-                producer.sendMessage(Constant.SEND_TO_AUCTION_POST_FOR_CREATE_CHATROOM, sendToChatDto);
+                producer.sendMessage(Constant.SEND_TO_AUCTION_POST_FOR_CREATE_CHATROOM,
+                    SendToChatDto.builder()
+                        .auctionUuid(auctionUuid)
+                        .memberUuids(memberUuids)
+                        .build());
                 return null;
             } catch (Exception e) {
                 log.info("Error processing auctionUuid: {}", e.getMessage());
