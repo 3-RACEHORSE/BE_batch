@@ -62,7 +62,7 @@ public class BeforeEventStartJob {
                     .eventType("Event Preview Alarm")
                     .message("행사 시작까지 24시간 남았어요.")
                     .receiverUuids(payments.stream().map(Payment::getMemberUuid).toList())
-                    .url(auctionUuid)
+                    .uuid(auctionUuid)
                     .build();
 
                 // kafka 메세지 전송

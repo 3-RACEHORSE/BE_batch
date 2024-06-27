@@ -14,13 +14,13 @@ public class AlarmDto {
     private List<String> receiverUuids;
     private String message;
     private String eventType;
-    private String url;
+    private String uuid;
 
     @Builder
-    public AlarmDto(List<String> receiverUuids, String message, String eventType, String url) {
+    public AlarmDto(List<String> receiverUuids, String message, String eventType, String uuid) {
         this.receiverUuids = receiverUuids;
         this.message = message;
         this.eventType = eventType;
-        this.url = url;
+        this.uuid = uuid;
     }
 }
