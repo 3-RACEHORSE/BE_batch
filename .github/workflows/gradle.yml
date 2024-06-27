@@ -87,7 +87,7 @@ jobs:
           sudo docker rm batch-server     
 
       - name: Run new docker container
-        run: sudo docker run -d --restart unless-stopped --name batch-server -p ${{ secrets.POST_FORWOADING }} --net cheonma-network ${{ secrets.DOCKERHUB_USERNAME }}/batch-server:latest
+        run: sudo docker run -d --name batch-server -p ${{ secrets.POST_FORWOADING }} --net cheonma-network ${{ secrets.DOCKERHUB_USERNAME }}/batch-server:latest
 
       - name: Delete old docker image
         run: sudo docker system prune -f
