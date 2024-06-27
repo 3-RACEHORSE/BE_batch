@@ -24,8 +24,6 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic alarmTopic() {
         return TopicBuilder.name(Topics.Constant.ALARM_TOPIC)
-            .partitions(2)
-            .replicas(2)
             .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
             .build();
     }
@@ -33,8 +31,6 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic auctionPostDonationUpdateTopic() {
         return TopicBuilder.name(Topics.Constant.AUCTION_POST_DONATION_UPDATE)
-            .partitions(2)
-            .replicas(2)
             .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
             .build();
     }
@@ -56,8 +52,6 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic sendToAuctionPostForCreateChatRoomTopic() {
         return TopicBuilder.name(Constant.SEND_TO_AUCTION_POST_FOR_CREATE_CHATROOM)
-            .partitions(2)
-            .replicas(2)
             .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
             .build();
     }
