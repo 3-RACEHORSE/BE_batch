@@ -6,6 +6,7 @@ import com.meetplus.batch.infrastructure.payment.BankRepository;
 import com.meetplus.batch.infrastructure.payment.TotalSettlementRepository;
 import jakarta.persistence.EntityManagerFactory;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -49,7 +50,7 @@ public class DonationTotalJob {
 	@Bean
 	public TotalDonationItemReader totalDonationReader() {
 		log.info("totalDonationReader");
-		return new TotalDonationItemReader(bankRepository);
+		return new TotalDonationItemReader(bankRepository, totalSettlementRepository);
 	}
 
 	@Bean
@@ -59,20 +60,22 @@ public class DonationTotalJob {
 			try {
 				BigDecimal totalDonation = totalDonationDto.getTotalDonation();
 				List<TotalDonationSettlement> totalDonationSettlement = totalSettlementRepository.findAll();
-
+				log.info(totalDonationDto.getLastSettlementDate().toString());
 				if (totalDonationSettlement.isEmpty()) {
 					log.info("totalDonationSettlement is empty");
 					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
 						.totalDonation(totalDonation)
+						.lastSettlementDate(LocalDateTime.now())
 						.build();
 					log.info("totalDonationSettlement1: {}", totalDonationSettlement1.toString());
 					totalSettlementRepository.save(totalDonationSettlement1);
 					return totalDonationSettlement1;
 				}
 				else {
-					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
+					TotalDonationSettlement totalDonationSettlement1 = totalDonationSettlement.get(0).toBuilder()
 						.id(totalDonationSettlement.get(0).getId())
-						.totalDonation(totalDonation)
+						.totalDonation(totalDonationSettlement.get(0).getTotalDonation().add(totalDonation))
+						.lastSettlementDate(LocalDateTime.now())
 						.build();
 					log.info("totalDonationSettlement1: {}", totalDonationSettlement1);
 					totalSettlementRepository.save(totalDonationSettlement1);

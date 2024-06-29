@@ -34,7 +34,7 @@ public class DonationTotalSchedule {
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "00 30 07 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "00 39 12 * * ?", zone = "Asia/Seoul")
     public void runJob() {
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("donationTotalUuid", UUID.randomUUID().toString()).toJobParameters();

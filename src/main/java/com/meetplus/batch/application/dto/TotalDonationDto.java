@@ -1,6 +1,7 @@
 package com.meetplus.batch.application.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +11,15 @@ import lombok.Setter;
 public class TotalDonationDto {
 
 	private BigDecimal totalDonation;
+	private LocalDateTime lastSettlementDate;
 
-	@Builder
 	public TotalDonationDto(BigDecimal totalDonation) {
 		this.totalDonation = totalDonation;
+	}
+
+	@Builder
+	public TotalDonationDto(BigDecimal totalDonation, LocalDateTime lastSettlementDate) {
+		this.totalDonation = totalDonation;
+		this.lastSettlementDate = lastSettlementDate;
 	}
 }

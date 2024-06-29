@@ -21,6 +21,8 @@ public class QTotalDonationSettlement extends EntityPathBase<TotalDonationSettle
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final DateTimePath<java.time.LocalDateTime> lastSettlementDate = createDateTime("lastSettlementDate", java.time.LocalDateTime.class);
+
     public final NumberPath<java.math.BigDecimal> totalDonation = createNumber("totalDonation", java.math.BigDecimal.class);
 
     public QTotalDonationSettlement(String variable) {
