@@ -18,20 +18,21 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
 public class KafkaProducerConfig {
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
     @Bean
     public NewTopic alarmTopic() {
         return TopicBuilder.name(Topics.Constant.ALARM_TOPIC)
-            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
+            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000))
             .build();
     }
 
     @Bean
     public NewTopic auctionPostDonationUpdateTopic() {
         return TopicBuilder.name(Topics.Constant.AUCTION_POST_DONATION_UPDATE)
-            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
+            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000))
             .build();
     }
 
@@ -52,7 +53,8 @@ public class KafkaProducerConfig {
     @Bean
     public NewTopic sendToAuctionPostForCreateChatRoomTopic() {
         return TopicBuilder.name(Constant.SEND_TO_AUCTION_POST_FOR_CREATE_CHATROOM)
-            .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(86400000)) // 1일 (24시간) = 86400000 밀리초
+            .config(TopicConfig.RETENTION_MS_CONFIG,
+                String.valueOf(86400000))
             .build();
     }
 }

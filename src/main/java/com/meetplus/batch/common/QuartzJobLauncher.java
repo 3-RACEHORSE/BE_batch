@@ -20,6 +20,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 @Setter
 @RequiredArgsConstructor
 public class QuartzJobLauncher extends QuartzJobBean {
+
     private String jobName;
     private final JobLauncher jobLauncher;
     private final JobLocator jobLocator;
@@ -29,14 +30,14 @@ public class QuartzJobLauncher extends QuartzJobBean {
         Date paymentDeadLine = new Date();
         SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        try{
+        try {
             Job job = jobLocator.getJob(jobName);
             JobParameters jobParameters = new JobParametersBuilder()
                 .addDate("requestDate", paymentDeadLine)
                 .toJobParameters();
             jobLauncher.run(job, jobParameters);
-        }catch (Exception e){
-            log.info("error : {}",e);
+        } catch (Exception e) {
+            log.info("error : {}", e);
         }
     }
 }

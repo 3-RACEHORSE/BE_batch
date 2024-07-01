@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 public class TotalDonationDto {
 
-	private BigDecimal totalDonation;
+    private BigDecimal totalDonation;
 
-	@Builder
-	public TotalDonationDto(BigDecimal totalDonation) {
-		this.totalDonation = totalDonation;
-	}
+    @Builder
+    public TotalDonationDto(BigDecimal totalDonation) {
+        this.totalDonation = totalDonation;
+    }
 }

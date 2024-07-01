@@ -39,7 +39,7 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "payment_method", nullable = true, length = 50)
     private String paymentMethod;
     @Column(name = "payment_number", nullable = true, length = 50)
-    private String paymentNumber; //카드번호나 계좌번호 같은 것
+    private String paymentNumber;
     @Column(name = "payment_status", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;

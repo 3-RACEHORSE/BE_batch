@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AuctionTotalAmountDto {
+
     private String auctionUuid;
     private BigDecimal totalAmount;
 

@@ -24,10 +24,9 @@ public class SendToChatSchedule {
         this.sendToChatDataJob = sendToChatDataJob;
     }
 
-    @Scheduled(cron = "0 0 9 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 7 * * ?", zone = "Asia/Seoul")
     public void runJob() throws Exception {
         try {
-            log.info(">>>>>>>> Running job");
             JobParameters jobParameters = new JobParametersBuilder()
                 .addString("sendToChatTime",
                     String.valueOf(System.currentTimeMillis()))  // 고유한 파라미터 추가

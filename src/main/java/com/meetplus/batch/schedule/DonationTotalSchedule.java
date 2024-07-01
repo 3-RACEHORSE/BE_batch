@@ -39,10 +39,6 @@ public class DonationTotalSchedule {
         JobParameters jobParameters = new JobParametersBuilder()
             .addString("donationTotalUuid", UUID.randomUUID().toString()).toJobParameters();
 
-        log.info("------------------------");
-        log.info("jobinstance: {}", jobExplorer.getLastJobInstance("donationTotalJob"));
-        log.info("------------------------");
-
         JobInstance jobInstance = jobExplorer.getLastJobInstance("donationTotalJob");
         if (jobInstance != null) {
             JobExecution jobExecution = jobExplorer.getLastJobExecution(jobInstance);
@@ -50,12 +46,10 @@ public class DonationTotalSchedule {
                 (jobExecution.getStatus() == BatchStatus.STOPPED ||
                     jobExecution.getStatus() == BatchStatus.FAILED
                 )) {
-                log.info(">>>>>>> run stopped or failed totalDonationJob");
                 runDonationTotalJob(jobExecution.getJobParameters());
             }
         }
 
-        log.info(">>>>>>> run DonationTotalStatusJob");
         runDonationTotalJob(jobParameters);
     }
 

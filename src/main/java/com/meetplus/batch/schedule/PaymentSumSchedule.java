@@ -49,12 +49,9 @@ public class PaymentSumSchedule {
                 (jobExecution.getStatus() == BatchStatus.STOPPED ||
                     jobExecution.getStatus() == BatchStatus.FAILED
                 )) {
-                log.info(">>>>>>> run stopped or failed sumPaymentAmountPaidJob");
                 runSumPaymentAmountPaidJob(jobExecution.getJobParameters());
             }
         }
-
-        log.info(">>>>>>> run sumPaymentStatusJob");
         runSumPaymentAmountPaidJob(jobParameters);
     }
 
