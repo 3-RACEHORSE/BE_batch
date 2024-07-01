@@ -29,7 +29,6 @@ public class BeforeEventStart{
     public BeforeEventStart(Long id, String auctionUuid, LocalDateTime eventStartTime) {
         this.id = id;
         this.auctionUuid = auctionUuid;
-        // 실행할 시간 저장
         this.eventStartTime = eventStartTime;
         this.jobState = false;
     }

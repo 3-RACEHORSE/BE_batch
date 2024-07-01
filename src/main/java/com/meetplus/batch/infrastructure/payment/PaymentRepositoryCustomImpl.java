@@ -32,7 +32,7 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
             .select(Projections.constructor(
                 AuctionTotalAmountDto.class,
                 payment.auctionUuid,
-                payment.amountPaid.sum().coalesce(BigDecimal.ZERO) // 합계가 null인 경우 0으로 대체
+                payment.amountPaid.sum().coalesce(BigDecimal.ZERO)
             ))
             .from(payment)
             .where(payment.completionAt.between(startTime, endTime))

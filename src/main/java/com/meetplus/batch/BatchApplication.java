@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class BatchApplication {
 
     public static void main(String[] args) {
-        // application 전체 timezone을 UTC로 설정
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         SpringApplication.run(BatchApplication.class, args);

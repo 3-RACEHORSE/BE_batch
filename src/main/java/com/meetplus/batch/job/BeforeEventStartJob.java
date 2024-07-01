@@ -4,7 +4,6 @@ import com.meetplus.batch.common.PaymentStatus;
 import com.meetplus.batch.domain.payment.Payment;
 import com.meetplus.batch.infrastructure.payment.PaymentRepository;
 import com.meetplus.batch.kafka.KafkaProducerCluster;
-import com.meetplus.batch.kafka.Topics;
 import com.meetplus.batch.kafka.Topics.Constant;
 import com.meetplus.batch.kafka.dto.AlarmDto;
 import java.util.List;
@@ -54,7 +53,6 @@ public class BeforeEventStartJob {
                 List<Payment> payments = paymentRepository.findByAuctionUuidAndPaymentStatus(
                     auctionUuid, PaymentStatus.COMPLETE);
                 if (payments.isEmpty()) {
-                    log.info("there is no payment for auction uuid: {}", auctionUuid);
                     return RepeatStatus.FINISHED;
                 }
 
@@ -65,7 +63,6 @@ public class BeforeEventStartJob {
                     .uuid(auctionUuid)
                     .build();
 
-                // kafka 메세지 전송
                 producer.sendMessage(Constant.ALARM_TOPIC, alarmDto);
                 return RepeatStatus.FINISHED;
             }, transactionManager)

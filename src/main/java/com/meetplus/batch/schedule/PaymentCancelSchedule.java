@@ -52,12 +52,10 @@ public class PaymentCancelSchedule {
                 (jobExecution.getStatus() == BatchStatus.STOPPED ||
                     jobExecution.getStatus() == BatchStatus.FAILED
                 )) {
-                log.info(">>>>>>> run stopped or failed updatePaymentStatusJob");
                 runUpdatePaymentAmountPaidJob(jobParameters);
             }
         }
 
-        log.info(">>>>>>> run updatePaymentStatusJob");
         runUpdatePaymentAmountPaidJob(jobParameters);
     }
 

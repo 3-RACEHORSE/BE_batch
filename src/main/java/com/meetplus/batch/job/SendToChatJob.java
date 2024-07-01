@@ -68,9 +68,6 @@ public class SendToChatJob {
             auctionUuids = paymentRepository.getAuctionUuidsByDateRange(
                 DateRangeUtil.getStartTime(2).minusDays(1),
                 DateRangeUtil.getStartTime(2));
-//            log.info("auctionUuids: {}", auctionUuids);
-            log.info("시작시간: {}", DateRangeUtil.getStartTime(2).minusDays(1));
-            log.info("마감시간: {}", DateRangeUtil.getStartTime(2));
         }
 
         return new ItemReader<String>() {
@@ -81,7 +78,7 @@ public class SendToChatJob {
                 if (nextIndex < auctionUuids.size()) {
                     return auctionUuids.get(nextIndex++);
                 } else {
-                    return null; // 모든 auctionUuid를 처리한 경우 null 반환
+                    return null;
                 }
             }
         };
@@ -92,10 +89,8 @@ public class SendToChatJob {
     public ItemProcessor<String, Void> sendToChatProcessor() {
         return auctionUuid -> {
             try {
-                log.info("Processing auctionUuid: {}", auctionUuid);
                 List<String> memberUuids = paymentRepository.getMemberUuidsByAuctionUuidAndPaymentStatus(
                     auctionUuid, PaymentStatus.COMPLETE);
-//                log.info("MemberUuids: {}", memberUuids.toString());
 
                 producer.sendMessage(Constant.SEND_TO_AUCTION_POST_FOR_CREATE_CHATROOM,
                     SendToChatDto.builder()
@@ -113,7 +108,6 @@ public class SendToChatJob {
     @Bean
     public ItemWriter<Void> sendToChatWriter() {
         return items -> {
-            // 할게 없음
         };
     }
 
@@ -122,7 +116,7 @@ public class SendToChatJob {
     @Qualifier("sendToChatStep")
     public Step sendToChatStep() {
         return new StepBuilder("sendToChatStep", jobRepository)
-            .<String, Void>chunk(10, transactionManager) // 한 번에 처리할 아이템 수를 지정합니다.
+            .<String, Void>chunk(10, transactionManager)
             .reader(sendToChatReader())
             .processor(sendToChatProcessor())
             .writer(sendToChatWriter())
@@ -133,7 +127,7 @@ public class SendToChatJob {
     @Qualifier("sendToChatDataJob")
     public Job sendToChatDataJob(@Qualifier("sendToChatStep") Step sendToChatStep) {
         return new JobBuilder("sendToChatDataJob", jobRepository)
-            .start(sendToChatStep) // 시작할 Step을 지정합니다.
+            .start(sendToChatStep)
             .build();
     }
 }

@@ -34,12 +34,10 @@ public class BeforeEventStartSchedule {
 
     public void scheduleJob(EventStartTimeDto eventStartTimeDto) {
 
-        // delay가 0이 되면 Job 실행
         long delay =
             eventStartTimeDto.getEventStartTime() - ScheduleTimeEnum.BEFORE_EVENT_START_24.getTime()
                 - System.currentTimeMillis();
 
-        // delay가 음수인 경우 즉시 실행
         if (delay < 0) {
             log.warn("Execution time is in the past. Job will be executed immediately.");
             delay = 0;

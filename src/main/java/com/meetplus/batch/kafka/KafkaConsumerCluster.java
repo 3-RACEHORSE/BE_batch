@@ -22,7 +22,6 @@ public class KafkaConsumerCluster {
     @KafkaListener(topics = Constant.EVENT_START_TOPIC, containerFactory = "kafkaListenerContainerFactory")
     public void eventStart(@Payload LinkedHashMap<String, Object> message,
         @Headers MessageHeaders messageHeaders) {
-        log.info("consumer: success >>> message: {}, headers: {}", message, messageHeaders);
 
         try {
             EventStartTimeDto eventStartTimeDto = EventStartTimeDto.builder()

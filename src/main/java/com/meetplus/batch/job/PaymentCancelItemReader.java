@@ -36,7 +36,7 @@ public class PaymentCancelItemReader implements ItemReader<Payment> {
         if (paymentsIterator.hasNext()) {
             return paymentsIterator.next();
         } else {
-            return null; // 더 이상 읽을 데이터가 없음
+            return null;
         }
     }
 }

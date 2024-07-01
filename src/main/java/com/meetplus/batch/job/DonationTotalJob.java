@@ -27,90 +27,86 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Slf4j
 public class DonationTotalJob {
 
-	private final JobRepository jobRepository;
-	private final PlatformTransactionManager transactionManager;
-	private final BankRepository bankRepository;
-	private final TotalSettlementRepository totalSettlementRepository;
-	private final EntityManagerFactory entityManagerFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final BankRepository bankRepository;
+    private final TotalSettlementRepository totalSettlementRepository;
+    private final EntityManagerFactory entityManagerFactory;
 
-	@Autowired
-	public DonationTotalJob(JobRepository jobRepository,
-		@Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
-		BankRepository bankRepository,
-		TotalSettlementRepository totalSettlementRepository,
-		@Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-		this.jobRepository = jobRepository;
-		this.transactionManager = transactionManager;
-		this.bankRepository = bankRepository;
-		this.totalSettlementRepository = totalSettlementRepository;
-		this.entityManagerFactory = entityManagerFactory;
-	}
+    @Autowired
+    public DonationTotalJob(JobRepository jobRepository,
+        @Qualifier("paymentTransactionManager") PlatformTransactionManager transactionManager,
+        BankRepository bankRepository,
+        TotalSettlementRepository totalSettlementRepository,
+        @Qualifier("paymentEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.bankRepository = bankRepository;
+        this.totalSettlementRepository = totalSettlementRepository;
+        this.entityManagerFactory = entityManagerFactory;
+    }
 
-	@Bean
-	public TotalDonationItemReader totalDonationReader() {
-		log.info("totalDonationReader");
-		return new TotalDonationItemReader(bankRepository);
-	}
+    @Bean
+    public TotalDonationItemReader totalDonationReader() {
+        log.info("totalDonationReader");
+        return new TotalDonationItemReader(bankRepository);
+    }
 
-	@Bean
-	public ItemProcessor<TotalDonationDto, TotalDonationSettlement> TotalDonationProcessor(
-	) {
-		return totalDonationDto -> {
-			try {
-				BigDecimal totalDonation = totalDonationDto.getTotalDonation();
-				List<TotalDonationSettlement> totalDonationSettlement = totalSettlementRepository.findAll();
+    @Bean
+    public ItemProcessor<TotalDonationDto, TotalDonationSettlement> TotalDonationProcessor(
+    ) {
+        return totalDonationDto -> {
+            try {
+                BigDecimal totalDonation = totalDonationDto.getTotalDonation();
+                List<TotalDonationSettlement> totalDonationSettlement = totalSettlementRepository.findAll();
 
-				if (totalDonationSettlement.isEmpty()) {
-					log.info("totalDonationSettlement is empty");
-					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
-						.totalDonation(totalDonation)
-						.build();
-					log.info("totalDonationSettlement1: {}", totalDonationSettlement1.toString());
-					totalSettlementRepository.save(totalDonationSettlement1);
-					return totalDonationSettlement1;
-				}
-				else {
-					TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
-						.id(totalDonationSettlement.get(0).getId())
-						.totalDonation(totalDonation)
-						.build();
-					log.info("totalDonationSettlement1: {}", totalDonationSettlement1);
-					totalSettlementRepository.save(totalDonationSettlement1);
-					return null;
-				}
-			} catch (Exception e) {
-				log.info("processor error: {}", e.getMessage());
-				return null;
-			}
-		};
-	}
+                if (totalDonationSettlement.isEmpty()) {
+                    TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
+                        .totalDonation(totalDonation)
+                        .build();
+                    totalSettlementRepository.save(totalDonationSettlement1);
+                    return totalDonationSettlement1;
+                } else {
+                    TotalDonationSettlement totalDonationSettlement1 = TotalDonationSettlement.builder()
+                        .id(totalDonationSettlement.get(0).getId())
+                        .totalDonation(totalDonation)
+                        .build();
+                    totalSettlementRepository.save(totalDonationSettlement1);
+                    return null;
+                }
+            } catch (Exception e) {
+                log.info("processor error: {}", e.getMessage());
+                return null;
+            }
+        };
+    }
 
-	@Bean
-	public JpaItemWriter<TotalDonationSettlement> totalSettlementWriter() {
-		return new JpaItemWriterBuilder<TotalDonationSettlement>()
-			.entityManagerFactory(entityManagerFactory)
-			.build();
-	}
+    @Bean
+    public JpaItemWriter<TotalDonationSettlement> totalSettlementWriter() {
+        return new JpaItemWriterBuilder<TotalDonationSettlement>()
+            .entityManagerFactory(entityManagerFactory)
+            .build();
+    }
 
-	@Bean
-	@Qualifier("donationTotalStep")
-	public Step totalDonationStep() {
-		return new StepBuilder("donationTotalStep", jobRepository)
-			.<TotalDonationDto, TotalDonationSettlement>chunk(1, transactionManager)
-			.reader(totalDonationReader())
-			.processor(TotalDonationProcessor())
-			.writer(totalSettlementWriter())
-			.allowStartIfComplete(true)
-			.build();
-	}
+    @Bean
+    @Qualifier("donationTotalStep")
+    public Step totalDonationStep() {
+        return new StepBuilder("donationTotalStep", jobRepository)
+            .<TotalDonationDto, TotalDonationSettlement>chunk(1, transactionManager)
+            .reader(totalDonationReader())
+            .processor(TotalDonationProcessor())
+            .writer(totalSettlementWriter())
+            .allowStartIfComplete(true)
+            .build();
+    }
 
-	@Bean
-	@Qualifier("donationTotalJob")
-	public Job totalDonationSettlementJob(
-		@Qualifier("donationTotalStep") Step totalDonationStep) {
-		return new JobBuilder("donationTotalJob", jobRepository)
-			.incrementer(new RunIdIncrementer())
-			.start(totalDonationStep)
-			.build();
-	}
+    @Bean
+    @Qualifier("donationTotalJob")
+    public Job totalDonationSettlementJob(
+        @Qualifier("donationTotalStep") Step totalDonationStep) {
+        return new JobBuilder("donationTotalJob", jobRepository)
+            .incrementer(new RunIdIncrementer())
+            .start(totalDonationStep)
+            .build();
+    }
 }
