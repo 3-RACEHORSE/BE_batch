@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -46,7 +47,7 @@ public class PaymentCancelJob {
     }
 
     @Bean
-    @JobScope
+    @StepScope
     public PaymentCancelItemReader paymentCancelReader() {
         return new PaymentCancelItemReader(paymentRepository, customJobParameter);
     }
