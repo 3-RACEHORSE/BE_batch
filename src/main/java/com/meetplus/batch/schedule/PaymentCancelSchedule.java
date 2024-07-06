@@ -38,11 +38,11 @@ public class PaymentCancelSchedule {
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 45 16 * * ?", zone = "Asia/Seoul")
     public void runJob() throws Exception {
         JobParameters jobParameters = new JobParametersBuilder()
-            .addString("paymentJobStartTime", DateRangeUtil.getStartTime(2).toString())
-            .addString("paymentJobEndTime", DateRangeUtil.getEndTime(2).toString())
+            .addLocalDateTime("paymentJobStartTime", DateRangeUtil.getStartTime(2))
+            .addLocalDateTime("paymentJobEndTime", DateRangeUtil.getEndTime(2))
             .addString("paymentCancelUuid", UUID.randomUUID().toString()).toJobParameters();
 
         JobInstance jobInstance = jobExplorer.getLastJobInstance("updatePaymentStatusJob");

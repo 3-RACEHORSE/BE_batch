@@ -10,16 +10,16 @@ public class CustomJobParameter {
     private LocalDateTime paymentJobEndTime;
 
     @Value("#{jobParameters['paymentJobStartTime']}")
-    public void setPaymentJobStartTime(String paymentJobStartTime) {
-        if(paymentJobStartTime != null && !paymentJobStartTime.isEmpty()) {
-            this.paymentJobStartTime = LocalDateTime.parse(paymentJobStartTime);
+    public void setPaymentJobStartTime(LocalDateTime paymentJobStartTime) {
+        if(paymentJobStartTime != null) {
+            this.paymentJobStartTime = paymentJobStartTime;
         }
     }
 
     @Value("#{jobParameters['paymentJobEndTime']}")
-    public void setPaymentJobEndTime(String paymentJobEndTime) {
-        if(paymentJobEndTime != null && !paymentJobEndTime.isEmpty()) {
-            this.paymentJobEndTime = LocalDateTime.parse(paymentJobEndTime);
+    public void setPaymentJobEndTime(LocalDateTime paymentJobEndTime) {
+        if(paymentJobEndTime != null) {
+            this.paymentJobEndTime = paymentJobEndTime;
         }
     }
 }

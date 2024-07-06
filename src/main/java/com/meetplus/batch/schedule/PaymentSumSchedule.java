@@ -35,11 +35,11 @@ public class PaymentSumSchedule {
         this.jobExplorer = jobExplorer;
     }
 
-    @Scheduled(cron = "0 0 5 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 20 17 * * ?", zone = "Asia/Seoul")
     public void runJob() {
         JobParameters jobParameters = new JobParametersBuilder()
-            .addString("paymentJobStartTime", DateRangeUtil.getStartTime(5).toString())
-            .addString("paymentJobEndTime", DateRangeUtil.getEndTime(5).toString())
+            .addLocalDateTime("paymentJobStartTime", DateRangeUtil.getStartTime(5))
+            .addLocalDateTime("paymentJobEndTime", DateRangeUtil.getEndTime(5))
             .addString("paymentSumUuid", UUID.randomUUID().toString()).toJobParameters();
 
         JobInstance jobInstance = jobExplorer.getLastJobInstance("sumPaymentAmountPaidJob");
